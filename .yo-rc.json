@@ -1,0 +1,10 @@
+{
+  "generator-jhipster-module": {
+    "promptValues": {
+      "githubName": "jordanjean",
+      "authorName": "Jordan Jean",
+      "authorEmail": "",
+      "authorUrl": "https://www.linkedin.com/in/jordanjean/"
+    }
+  }
+}

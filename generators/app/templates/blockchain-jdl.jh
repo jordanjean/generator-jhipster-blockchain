@@ -1,0 +1,8 @@
+entity Request {
+    type RequestType,
+    date Instant,
+    value String,
+}
+enum RequestType {
+    ADDITION, DELETION, SET, GET
+}
