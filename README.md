@@ -1,6 +1,6 @@
 # generator-jhipster-blockchain
 [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
-> JHipster module, 
+> JHipster module,
 
 # Introduction
 
@@ -46,7 +46,7 @@ npm update -g generator-jhipster-blockchain
 
 # License
 
-MIT © [Jordan Jean](https://www.linkedin.com/in/jordanjean/)
+MIT © [Jordan Jean](https://gitlab.com/ugachain)
 
 
 [npm-image]: https://img.shields.io/npm/v/generator-jhipster-blockchain.svg
