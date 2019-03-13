@@ -1,13 +1,13 @@
 {
   "name": "generator-jhipster-blockchain",
   "version": "0.0.1",
-  "description": "",
+  "description": "JHipster module to set a simple web application and an Hyperledger Fabric network v1.4 to add delete get and set entities on a blockchain.",
   "keywords": [
     "yeoman-generator",
     "jhipster-module",
     "jhipster-5"
   ],
-  "homepage": "https://github.com/jordanjean/generator-jhipster-blockchain",
+  "homepage": "https://gitlab.com/ugachain",
   "author": {
     "name": "Jordan Jean",
     "email": "",
@@ -19,7 +19,7 @@
   "main": "generators/app/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jordanjean/generator-jhipster-blockchain.git"
+    "url": "git+https://gitlab.com/ugachain/generator-jhipster-blockchain"
   },
   "dependencies": {
     "chalk": "2.4.1",
@@ -51,6 +51,6 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jordanjean/generator-jhipster-blockchain/issues"
+    "url": "https://gitlab.com/ugachain/generator-jhipster-blockchain"
   }
 }
