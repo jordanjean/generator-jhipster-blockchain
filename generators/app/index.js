@@ -55,7 +55,9 @@ module.exports = class extends BaseGenerator {
             this.fs.copyTpl(
                 this.templatePath(source),
                 this.destinationPath(destination),
-                this
+                this,
+                null,
+                { globOptions: { dot: true } }
             );
         };
 
