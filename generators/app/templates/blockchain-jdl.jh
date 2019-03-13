@@ -1,7 +1,9 @@
 entity Request {
     type RequestType,
     date Instant,
+    key String,
     value String,
+    status String
 }
 enum RequestType {
     ADDITION, DELETION, SET, GET
