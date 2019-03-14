@@ -88,12 +88,6 @@ module.exports = class extends BaseGenerator {
 
         // Write fabric-network folder
         this.template('fabric-network', 'fabric-network');
-
-        // Write JDL file
-        this.template('blockchain-jdl.jh', 'blockchain-jdl.jh');
-
-        // Import JDL
-        shelljs.exec('jhipster import-jdl blockchain-jdl.jh');
     }
 
     install() {
@@ -523,7 +517,8 @@ import ${packageName}.network.request.Get;
 import ${packageName}.network.request.Set;
 import ${packageName}.repository.RequestRepository;
 import ${packageName}.web.rest.errors.BadRequestAlertException;
-import ${packageName}.web.rest.util.HeaderUtil;\n`]
+import ${packageName}.web.rest.util.HeaderUtil;
+import org.springframework.http.HttpStatus;\n`]
         }, this);
 
         // Write description and Hyperledger section in readme

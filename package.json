@@ -1,6 +1,6 @@
 {
   "name": "generator-jhipster-blockchain",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "JHipster module to set a simple web application and an Hyperledger Fabric network v1.4 to manage entities on a blockchain.",
   "keywords": [
     "yeoman-generator",
