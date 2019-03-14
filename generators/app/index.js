@@ -526,6 +526,13 @@ import ${packageName}.web.rest.errors.BadRequestAlertException;
 import ${packageName}.web.rest.util.HeaderUtil;\n`]
         }, this);
 
+        // Write description and Hyperledger section in readme
+        jhipsterUtils.rewriteFile({
+            file: `README.md`,
+            needle: '## Development',
+            splicable: ['This is a simple web application to manage entities on a blockchain using an Hyperledger Fabric network v1.4.\n\n## Hyperledger\n\nTo run this application you will need to run Hyperledger. See the readme in `./fabric-network/README.md` to know how.\n']
+        }, this);
+
     }
 
     end() {
