@@ -4,6 +4,8 @@
 
 # Introduction
 
+This is a module to set a simple web application and an Hyperledger Fabric network v1.4 to add delete get and set entities on a blockchain.
+
 This is a [JHipster](http://jhipster.github.io/) module, that is meant to be used in a JHipster application.
 
 # Prerequisites
