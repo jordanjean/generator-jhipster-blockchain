@@ -46,6 +46,12 @@ npm update -g generator-jhipster-blockchain
 
 # Usage
 
+To run the generator: 
+
+```bash
+yo jhipster-blockchain`
+```
+
 # License
 
 MIT © [Jordan Jean](https://gitlab.com/ugachain)
