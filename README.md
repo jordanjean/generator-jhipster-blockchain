@@ -49,7 +49,7 @@ npm update -g generator-jhipster-blockchain
 To run the generator: 
 
 ```bash
-yo jhipster-blockchain`
+yo jhipster-blockchain
 ```
 
 # License
