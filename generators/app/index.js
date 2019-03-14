@@ -92,8 +92,8 @@ module.exports = class extends BaseGenerator {
         // Write JDL file
         this.template('blockchain-jdl.jh', 'blockchain-jdl.jh');
 
-        // Write RequestRessource.java file
-        this.template('RequestResource.java', `${javaDir}/web/rest/RequestResource.java`);
+        // Import JDL
+        shelljs.exec('jhipster import-jdl blockchain-jdl.jh');
     }
 
     install() {
@@ -241,13 +241,6 @@ module.exports = class extends BaseGenerator {
             splicable: [`package ${packageName}.network;\n`]
         }, this);
 
-        // Write package statement
-        jhipsterUtils.rewriteFile({
-            file: `${javaDir}/web/rest/RequestResource.java`,
-            needle: 'import java.net.URI;',
-            splicable: [`package ${packageName}.web.rest;\n`]
-        }, this);
-
         // Write imports
         jhipsterUtils.rewriteFile({
             file: `${javaDir}network/request/A_BlockchainRequest.java`,
@@ -301,8 +294,214 @@ import ${packageName}.network.networkException.StateAlreadySet;\n`]
             splicable: [`// https://mvnrepository.com/artifact/org.hyperledger.fabric-sdk-java/fabric-sdk-java\ncompile group: 'org.hyperledger.fabric-sdk-java', name: 'fabric-sdk-java', version: '1.4.0'`]
         }, this);
 
-        // Import JDL
-        shelljs.exec('jhipster import-jdl blockchain-jdl.jh');
+        // Get entities in JSON format
+        var json_entities = this.getExistingEntities();
+
+        // Write blockchain operations for each entity
+        json_entities.forEach(entity => {
+            console.log(`Write blockchain operations for ${entity.name} entity`);
+
+            // Write blockchain add request call
+            jhipsterUtils.rewriteFile({
+                file: `${javaDir}web/rest/${entity.name}Resource.java`,
+                needle: '        return ResponseEntity.created(new URI("/api/requests/" + result.getId()))',
+                splicable: [`// Process blockchain add request
+		addRequest(request.getId().toString(), request.toString());`]
+            }, this);
+
+            // Write blockchain delete request call
+            jhipsterUtils.rewriteFile({
+                file: `${javaDir}web/rest/${entity.name}Resource.java`,
+                needle: '        return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();',
+                splicable: [`// Process blockchain delete request
+		deleteRequest(id.toString());\n`]
+            }, this);
+
+        //     // Write blockchain set request call
+        //     jhipsterUtils.rewriteFile({
+        //         file: `${javaDir}web/rest/${entity.name}Resource.java`,
+        //         needle: `        return ResponseEntity.ok()
+        //     .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, request.getId().toString()))
+        //     .body(result);`,
+        //         splicable: [`// Process blockchain set request
+		// setRequest(request.getId().toString(), request.toString());\n`]
+        //     }, this);
+
+            // Write blockchain request functions
+            jhipsterUtils.rewriteFile({
+                file: `${javaDir}web/rest/${entity.name}Resource.java`,
+                needle: '}',
+                splicable: [`
+	/**
+	 * POST /requests/add : add a new value to the blockchain.
+	 *
+	 * @param value the hash of the diploma we want to add to the BC
+	 * @return the ResponseEntity with status 200 (OK) and the transaction ID, or
+	 *         with status 417 (EXPECTATION_FAILED), or with status 500
+	 *         (INTERNAL_SERVER_ERROR)
+	 */
+	@PostMapping("/requests/add")
+	public ResponseEntity<String> addRequest(@RequestParam String entity, String value) {
+		if (entity.isEmpty()) {
+			log.debug("Empty entity name");
+			return new ResponseEntity<String>("EMPTY_ENTITY_NAME", HttpStatus.EXPECTATION_FAILED);
+		}
+		if (value.isEmpty()) {
+			log.debug("Empty value");
+			return new ResponseEntity<String>("EMPTY_VALUE", HttpStatus.EXPECTATION_FAILED);
+		}
+
+		Add blockchainRequest;
+		String transactionID;
+		try {
+			blockchainRequest = new Add(entity, value);
+			blockchainRequest.send();
+			transactionID = blockchainRequest.transactionID;
+		} catch (A_BlockchainException e) {
+			String errored = "BLOCKCHAIN ERROR: " + e.toString();
+			log.debug(errored);
+			return new ResponseEntity<String>(errored, HttpStatus.NOT_ACCEPTABLE);
+		} catch (Exception e) {
+			String errored = "BLOCKCHAIN ERROR: " + e.toString();
+			log.debug(errored);
+			return new ResponseEntity<String>(errored, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		// Create JSON string
+		String returned = "{" + '"' + "transactionID" + '"' + ":" + '"' + transactionID + '"' + "}";
+		return new ResponseEntity<String>(returned, HttpStatus.OK);
+	}
+
+	/**
+	 * GET /requests/get : Get an entity value from the blockchain
+	 *
+	 * @param entity the entity to query
+	 * @return the ResponseEntity with status 200 (OK) and the value of the entity,
+	 *         or with status 417 (EXPECTATION_FAILED), or with status 500
+	 *         (INTERNAL_SERVER_ERROR)
+	 */
+	@GetMapping("/requests/get")
+	public ResponseEntity<String> getRequest(@RequestParam String entity) {
+		if (entity.isEmpty()) {
+			log.debug("Empty entity name");
+			return new ResponseEntity<String>("EMPTY_ENTITY_NAME", HttpStatus.EXPECTATION_FAILED);
+		}
+
+		String value = null;
+		Get get;
+
+		try {
+			get = new Get(entity);
+			get.send();
+			value = get.state;
+		} catch (EntityNotFound e) {
+			String errored = "BLOCKCHAIN ERROR: " + e.toString();
+			log.debug(errored);
+
+			// Create JSON string
+			String returned = "{" + '"' + "entityState" + '"' + ":" + '"' + "NOT_FOUND" + '"' + "}";
+			return new ResponseEntity<String>(returned, HttpStatus.OK);
+		} catch (Exception e) {
+			String errored = "BLOCKCHAIN ERROR: " + e.toString();
+			log.debug(errored);
+			return new ResponseEntity<String>(errored, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		if (value == null) {
+			log.debug("The query has failed");
+			return new ResponseEntity<String>("QUERY FAILED", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		switch (value) {
+		case "NOT_FOUND":
+			// Create JSON string
+			String returned = "{" + '"' + "entityState" + '"' + ":" + '"' + "NOT_FOUND" + '"' + "}";
+			return new ResponseEntity<String>(returned, HttpStatus.OK);
+		}
+
+		// Create JSON string
+		String returned = "{" + '"' + "entityState" + '"' + ":" + '"' + value + '"' + "}";
+		return new ResponseEntity<String>(returned, HttpStatus.OK);
+	}
+
+	/**
+	 * DELETE /requests/delete : delete an entity from the blockchain.
+	 *
+	 * @param entity to delete from the blockchain
+	 * @return the ResponseEntity with status 200 (OK) and the transaction ID, or
+	 *         with status 417 (EXPECTATION_FAILED), or with status 500
+	 *         (INTERNAL_SERVER_ERROR)
+	 */
+	@DeleteMapping("/requests/delete")
+	public ResponseEntity<String> deleteRequest(@RequestParam String entity) {
+		if (entity.isEmpty()) {
+			log.debug("Empty entity name");
+			return new ResponseEntity<String>("EMPTY_ENTITY_NAME", HttpStatus.EXPECTATION_FAILED);
+		}
+
+		Delete blockchainRequest;
+		String transactionID;
+		try {
+			blockchainRequest = new Delete(entity);
+			blockchainRequest.send();
+			transactionID = blockchainRequest.transactionID;
+		} catch (A_BlockchainException e) {
+			String errored = "BLOCKCHAIN ERROR: " + e.toString();
+			log.debug(errored);
+			return new ResponseEntity<String>(errored, HttpStatus.NOT_ACCEPTABLE);
+		} catch (Exception e) {
+			String errored = "BLOCKCHAIN ERROR: " + e.toString();
+			log.debug(errored);
+			return new ResponseEntity<String>(errored, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		// Create JSON string
+		String returned = "{" + '"' + "transactionID" + '"' + ":" + '"' + transactionID + '"' + "}";
+		return new ResponseEntity<String>(returned, HttpStatus.OK);
+	}
+
+	/**
+	 * POST /requests/set : set an entity in the blockchain.
+	 *
+	 *
+	 * @param entity the entity to add to the blockchain
+	 * @param value  the value to set the entity to
+	 * @return the ResponseEntity with status 200 (OK) and the transaction ID, or
+	 *         with status 417 (EXPECTATION_FAILED), or with status 500
+	 *         (INTERNAL_SERVER_ERROR)
+	 */
+	@PostMapping("/requests/set")
+	public ResponseEntity<String> setRequest(@RequestParam String entity, String value) {
+		if (entity.isEmpty()) {
+			log.debug("Empty entity name");
+			return new ResponseEntity<String>("EMPTY_ENTITY_NAME", HttpStatus.EXPECTATION_FAILED);
+		}
+		if (value.isEmpty()) {
+			log.debug("Empty value");
+			return new ResponseEntity<String>("EMPTY_VALUE", HttpStatus.EXPECTATION_FAILED);
+		}
+
+		Set blockchainRequest;
+		String transactionID;
+		try {
+			blockchainRequest = new Set(entity, value);
+			blockchainRequest.send();
+			transactionID = blockchainRequest.transactionID;
+		} catch (A_BlockchainException e) {
+			String errored = "BLOCKCHAIN ERROR: " + e.toString();
+			log.debug(errored);
+			return new ResponseEntity<String>(errored, HttpStatus.NOT_ACCEPTABLE);
+		} catch (Exception e) {
+			String errored = "BLOCKCHAIN ERROR: " + e.toString();
+			log.debug(errored);
+			return new ResponseEntity<String>(errored, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		// Create JSON string
+		String returned = "{" + '"' + "transactionID" + '"' + ":" + '"' + transactionID + '"' + "}";
+		return new ResponseEntity<String>(returned, HttpStatus.OK);
+	}\n`]
+            }, this);
+        });
 
         // Set log level to WARN
         jhipsterUtils.rewriteFile({
@@ -325,13 +524,6 @@ import ${packageName}.network.request.Set;
 import ${packageName}.repository.RequestRepository;
 import ${packageName}.web.rest.errors.BadRequestAlertException;
 import ${packageName}.web.rest.util.HeaderUtil;\n`]
-        }, this);
-
-        // Write description and Hyperledger section in readme
-        jhipsterUtils.rewriteFile({
-            file: `README.md`,
-            needle: '## Development',
-            splicable: ['This is a simple web application to manage entities on a blockchain using an Hyperledger Fabric network v1.4.\n\n## Hyperledger\n\nTo run this application you will need to run Hyperledger. See the readme in `blockchain/fabric-network` to know how.\n']
         }, this);
 
     }
