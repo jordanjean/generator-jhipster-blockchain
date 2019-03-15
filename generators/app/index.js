@@ -84,10 +84,18 @@ module.exports = class extends BaseGenerator {
         }
 
         // Write blockchain communication module package
-        this.template('network', `${javaDir}/network`);
+        this.template('network', `${javaDir}network`);
 
         // Write fabric-network folder
         this.template('fabric-network', 'fabric-network');
+
+        // Get entities in JSON format
+        var json_entities = this.getExistingEntities();
+
+        // Write resource file for each entity
+        json_entities.forEach(entity => {
+            this.template('template-file.java', `${javaDir}web/rest/${entity.name}Resource.java`);
+        });
     }
 
     install() {
@@ -291,50 +299,169 @@ import ${packageName}.network.networkException.StateAlreadySet;\n`]
         // Get entities in JSON format
         var json_entities = this.getExistingEntities();
 
-        // Write blockchain operations for each entity
+        // Write resource file for each entity
         json_entities.forEach(entity => {
-            console.log(`Write blockchain operations for ${entity.name} entity`);
+            console.log(`Writing ${entity.name} entity file`);
 
-            // Write blockchain add request call
+            var lowercase = `${entity.name}`.toLowerCase();
+
+            // Write file content
             jhipsterUtils.rewriteFile({
                 file: `${javaDir}web/rest/${entity.name}Resource.java`,
-                needle: '        return ResponseEntity.created(new URI("/api/requests/" + result.getId()))',
-                splicable: [`// Process blockchain add request
-		addRequest(request.getId().toString(), request.toString());`]
-            }, this);
+                needle: '',
+                splicable: [`package ${packageName}.web.rest;
 
-            // Write blockchain delete request call
-            jhipsterUtils.rewriteFile({
-                file: `${javaDir}web/rest/${entity.name}Resource.java`,
-                needle: '        return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();',
-                splicable: [`// Process blockchain delete request
-		deleteRequest(id.toString());\n`]
-            }, this);
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Optional;
 
-        //     // Write blockchain set request call
-        //     jhipsterUtils.rewriteFile({
-        //         file: `${javaDir}web/rest/${entity.name}Resource.java`,
-        //         needle: `        return ResponseEntity.ok()
-        //     .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, request.getId().toString()))
-        //     .body(result);`,
-        //         splicable: [`// Process blockchain set request
-		// setRequest(request.getId().toString(), request.toString());\n`]
-        //     }, this);
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-            // Write blockchain request functions
-            jhipsterUtils.rewriteFile({
-                file: `${javaDir}web/rest/${entity.name}Resource.java`,
-                needle: '}',
-                splicable: [`
+import ${packageName}.domain.${entity.name};
+import ${packageName}.network.networkException.A_BlockchainException;
+import ${packageName}.network.networkException.EntityNotFound;
+import ${packageName}.network.request.Add;
+import ${packageName}.network.request.Delete;
+import ${packageName}.network.request.Get;
+import ${packageName}.network.request.Set;
+import ${packageName}.repository.${entity.name}Repository;
+import ${packageName}.web.rest.errors.BadRequestAlertException;
+import ${packageName}.web.rest.util.HeaderUtil;
+
+import io.github.jhipster.web.util.ResponseUtil;
+
+/**
+ * REST controller for managing ${entity.name}.
+ */
+@RestController
+@RequestMapping("/api")
+public class ${entity.name}Resource {
+
+	private final Logger log = LoggerFactory.getLogger(${entity.name}Resource.class);
+
+	private static final String ENTITY_NAME = "${lowercase}";
+
+	private final ${entity.name}Repository ${lowercase}Repository;
+
+	public ${entity.name}Resource(${entity.name}Repository ${lowercase}Repository) {
+		this.${lowercase}Repository = ${lowercase}Repository;
+	}
+
 	/**
-	 * POST /requests/add : add a new value to the blockchain.
+	 * POST /${lowercase}s : Create a new ${lowercase}.
+	 *
+	 * @param ${lowercase} the ${lowercase} to create
+	 * @return the ResponseEntity with status 201 (Created) and with body the new
+	 *         ${lowercase}, or with status 400 (Bad Request) if the ${lowercase} has already
+	 *         an ID
+	 * @throws URISyntaxException if the Location URI syntax is incorrect
+	 */
+	@PostMapping("/${lowercase}s")
+	public ResponseEntity<${entity.name}> create${entity.name}(@RequestBody ${entity.name} ${lowercase}) throws URISyntaxException {
+		log.debug("REST request to save ${entity.name} : {}", ${lowercase});
+		if (${lowercase}.getId() != null) {
+			throw new BadRequestAlertException("A new ${lowercase} cannot already have an ID", ENTITY_NAME, "idexists");
+		}
+
+		${entity.name} result = ${lowercase}Repository.save(${lowercase});
+
+		// Process blockchain add request
+		addRequest(${lowercase}.getId().toString(), ${lowercase}.toString());
+
+		return ResponseEntity.created(new URI("/api/${lowercase}s/" + result.getId()))
+				.headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString())).body(result);
+	}
+
+	/**
+	 * PUT /${lowercase}s : Updates an existing ${lowercase}.
+	 *
+	 * @param ${lowercase} the ${lowercase} to update
+	 * @return the ResponseEntity with status 200 (OK) and with body the updated
+	 *         ${lowercase}, or with status 400 (Bad Request) if the ${lowercase} is not
+	 *         valid, or with status 500 (Internal Server Error) if the ${lowercase}
+	 *         couldn't be updated
+	 * @throws URISyntaxException if the Location URI syntax is incorrect
+	 */
+	@PutMapping("/${lowercase}s")
+	public ResponseEntity<${entity.name}> update${entity.name}(@RequestBody ${entity.name} ${lowercase}) throws URISyntaxException {
+		log.debug("REST request to update ${entity.name} : {}", ${lowercase});
+		if (${lowercase}.getId() == null) {
+			throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+		}
+
+		// Process blockchain set request
+		setRequest(${lowercase}.getId().toString(), ${lowercase}.toString());
+
+		${entity.name} result = ${lowercase}Repository.save(${lowercase});
+		return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, ${lowercase}.getId().toString()))
+				.body(result);
+	}
+
+	/**
+	 * GET /${lowercase}s : get all the ${lowercase}s.
+	 *
+	 * @return the ResponseEntity with status 200 (OK) and the list of ${lowercase}s in
+	 *         body
+	 */
+	@GetMapping("/${lowercase}s")
+	public List<${entity.name}> getAll${entity.name}s() {
+		log.debug("REST request to get all ${entity.name}s");
+		return ${lowercase}Repository.findAll();
+	}
+
+	/**
+	 * GET /${lowercase}s/:id : get the "id" ${lowercase}.
+	 *
+	 * @param id the id of the ${lowercase} to retrieve
+	 * @return the ResponseEntity with status 200 (OK) and with body the ${lowercase}, or
+	 *         with status 404 (Not Found)
+	 */
+	@GetMapping("/${lowercase}s/{id}")
+	public ResponseEntity<${entity.name}> getRequest(@PathVariable Long id) {
+		log.debug("REST request to get ${entity.name} : {}", id);
+		Optional<${entity.name}> ${lowercase} = ${lowercase}Repository.findById(id);
+		return ResponseUtil.wrapOrNotFound(${lowercase});
+	}
+
+	/**
+	 * DELETE /${lowercase}s/:id : delete the "id" ${lowercase}.
+	 *
+	 * @param id the id of the ${lowercase} to delete
+	 * @return the ResponseEntity with status 200 (OK)
+	 */
+	@DeleteMapping("/${lowercase}s/{id}")
+	public ResponseEntity<Void> delete${entity.name}(@PathVariable Long id) {
+		log.debug("REST request to delete ${entity.name} : {}", id);
+
+		// Process blockchain delete request
+		deleteRequest(id.toString());
+
+		${lowercase}Repository.deleteById(id);
+		return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+	}
+
+	/**
+	 * POST /${lowercase}s/add : add a new value to the blockchain.
 	 *
 	 * @param value the hash of the diploma we want to add to the BC
 	 * @return the ResponseEntity with status 200 (OK) and the transaction ID, or
 	 *         with status 417 (EXPECTATION_FAILED), or with status 500
 	 *         (INTERNAL_SERVER_ERROR)
 	 */
-	@PostMapping("/requests/add")
+	@PostMapping("/${lowercase}s/add")
 	public ResponseEntity<String> addRequest(@RequestParam String entity, String value) {
 		if (entity.isEmpty()) {
 			log.debug("Empty entity name");
@@ -367,14 +494,14 @@ import ${packageName}.network.networkException.StateAlreadySet;\n`]
 	}
 
 	/**
-	 * GET /requests/get : Get an entity value from the blockchain
+	 * GET /${lowercase}s/get : Get an entity value from the blockchain
 	 *
 	 * @param entity the entity to query
 	 * @return the ResponseEntity with status 200 (OK) and the value of the entity,
 	 *         or with status 417 (EXPECTATION_FAILED), or with status 500
 	 *         (INTERNAL_SERVER_ERROR)
 	 */
-	@GetMapping("/requests/get")
+	@GetMapping("/${lowercase}s/get")
 	public ResponseEntity<String> getRequest(@RequestParam String entity) {
 		if (entity.isEmpty()) {
 			log.debug("Empty entity name");
@@ -418,14 +545,14 @@ import ${packageName}.network.networkException.StateAlreadySet;\n`]
 	}
 
 	/**
-	 * DELETE /requests/delete : delete an entity from the blockchain.
+	 * DELETE /${lowercase}s/delete : delete an entity from the blockchain.
 	 *
 	 * @param entity to delete from the blockchain
 	 * @return the ResponseEntity with status 200 (OK) and the transaction ID, or
 	 *         with status 417 (EXPECTATION_FAILED), or with status 500
 	 *         (INTERNAL_SERVER_ERROR)
 	 */
-	@DeleteMapping("/requests/delete")
+	@DeleteMapping("/${lowercase}s/delete")
 	public ResponseEntity<String> deleteRequest(@RequestParam String entity) {
 		if (entity.isEmpty()) {
 			log.debug("Empty entity name");
@@ -454,7 +581,7 @@ import ${packageName}.network.networkException.StateAlreadySet;\n`]
 	}
 
 	/**
-	 * POST /requests/set : set an entity in the blockchain.
+	 * POST /${lowercase}s/set : set an entity in the blockchain.
 	 *
 	 *
 	 * @param entity the entity to add to the blockchain
@@ -463,7 +590,7 @@ import ${packageName}.network.networkException.StateAlreadySet;\n`]
 	 *         with status 417 (EXPECTATION_FAILED), or with status 500
 	 *         (INTERNAL_SERVER_ERROR)
 	 */
-	@PostMapping("/requests/set")
+	@PostMapping("/${lowercase}s/set")
 	public ResponseEntity<String> setRequest(@RequestParam String entity, String value) {
 		if (entity.isEmpty()) {
 			log.debug("Empty entity name");
@@ -493,7 +620,9 @@ import ${packageName}.network.networkException.StateAlreadySet;\n`]
 		// Create JSON string
 		String returned = "{" + '"' + "transactionID" + '"' + ":" + '"' + transactionID + '"' + "}";
 		return new ResponseEntity<String>(returned, HttpStatus.OK);
-	}\n`]
+	}
+
+}\n`]
             }, this);
         });
 
@@ -504,28 +633,11 @@ import ${packageName}.network.networkException.StateAlreadySet;\n`]
             splicable: [`<logger name="io" level="WARN"/>
 <logger name="i.n.h.c.http2.Http2ConnectionHandler" level="WARN"/>\n`]}, this);
 
-        // Write imports
-        jhipsterUtils.rewriteFile({
-            file: `${javaDir}web/rest/RequestResource.java`,
-            needle: 'import io.github.jhipster.web.util.ResponseUtil;',
-            splicable: [`import ${packageName}.domain.Request;
-import ${packageName}.network.networkException.A_BlockchainException;
-import ${packageName}.network.networkException.EntityNotFound;
-import ${packageName}.network.request.Add;
-import ${packageName}.network.request.Delete;
-import ${packageName}.network.request.Get;
-import ${packageName}.network.request.Set;
-import ${packageName}.repository.RequestRepository;
-import ${packageName}.web.rest.errors.BadRequestAlertException;
-import ${packageName}.web.rest.util.HeaderUtil;
-import org.springframework.http.HttpStatus;\n`]
-        }, this);
-
         // Write description and Hyperledger section in readme
         jhipsterUtils.rewriteFile({
             file: `README.md`,
             needle: '## Development',
-            splicable: ['This is a simple web application to manage entities on a blockchain using an Hyperledger Fabric network v1.4.\n\n## Hyperledger\n\nTo run this application you will need to run Hyperledger. See the readme in `./fabric-network/README.md` to know how.\n']
+            splicable: ['This is a simple web application to manage entities on a blockchain using an Hyperledger Fabric network v1.4.\n\nWhen you create, update or delete entities using this sample application, requests are sent to the Hyperledger network to update the blockchain ledger. For this to happen, Hyperledger must be running.\n\n## Hyperledger\n\nTo run this application you will need to run Hyperledger. See the readme in `./fabric-network/README.md` to know how.\n']
         }, this);
 
     }
