@@ -1,6 +1,6 @@
 # generator-jhipster-blockchain
 [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
-> JHipster module,
+> JHipster module to set a simple web application and an Hyperledger Fabric network v1.4 to manage entities on a blockchain.
 
 # Introduction
 
@@ -46,7 +46,7 @@ npm update -g generator-jhipster-blockchain
 
 # Usage
 
-To run the generator: 
+To run the generator:
 
 ```bash
 yo jhipster-blockchain
