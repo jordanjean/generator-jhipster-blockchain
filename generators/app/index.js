@@ -379,7 +379,9 @@ public class ${entity.name}Resource {
 		${entity.name} result = ${lowercase}Repository.save(${lowercase});
 
 		// Process blockchain add request
-		addRequest(${lowercase}.getId().toString(), ${lowercase}.toString());
+		log.debug("BLOCKCHAIN ADD: " + ${lowercase}.getId().toString() + " with the value: " + ${lowercase}.toString());
+		ResponseEntity<String> response = addRequest(${lowercase}.getId().toString(), ${lowercase}.toString());
+		log.debug("BLOCKCHAIN ADD RESPONSE: " + response);
 
 		return ResponseEntity.created(new URI("/api/${lowercase}s/" + result.getId()))
 				.headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString())).body(result);
@@ -403,7 +405,9 @@ public class ${entity.name}Resource {
 		}
 
 		// Process blockchain set request
-		setRequest(${lowercase}.getId().toString(), ${lowercase}.toString());
+		log.debug("BLOCKCHAIN UPDATE: " + ${lowercase}.getId().toString() + " to the value: " + ${lowercase}.toString());
+		ResponseEntity<String> response = setRequest(${lowercase}.getId().toString(), ${lowercase}.toString());
+		log.debug("BLOCKCHAIN UPDATE RESPONSE: " + response);
 
 		${entity.name} result = ${lowercase}Repository.save(${lowercase});
 		return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, ${lowercase}.getId().toString()))
@@ -446,8 +450,10 @@ public class ${entity.name}Resource {
 	public ResponseEntity<Void> delete${entity.name}(@PathVariable Long id) {
 		log.debug("REST request to delete ${entity.name} : {}", id);
 
-		// Process blockchain delete request
-		deleteRequest(id.toString());
+        // Process blockchain delete request
+		log.debug("BLOCKCHAIN DELETE: " + id.toString());
+		ResponseEntity<String> response = deleteRequest(id.toString());
+		log.debug("BLOCKCHAIN DELETE RESPONSE: " + response);
 
 		${lowercase}Repository.deleteById(id);
 		return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
