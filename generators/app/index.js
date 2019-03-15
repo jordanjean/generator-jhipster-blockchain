@@ -39,14 +39,20 @@ module.exports = class extends BaseGenerator {
     }
 
     prompting() {
+        const done = this.async();
         const prompts = [
             {
                 type: 'input',
-                name: 'message',
-                message: 'Please put something',
-                default: 'hello world!'
+                name: 'jdl',
+                message: 'You should have imported a JDL to be able to manage entities on the blockchain. Enter the path of your JDL file to import it.',
+                default: 'Do not import JDL'
             }
         ];
+
+        this.prompt(prompts).then((props) => {
+            this.jdl = props.jdl
+            done();
+        });
     }
 
     writing() {
@@ -81,6 +87,11 @@ module.exports = class extends BaseGenerator {
         if (this.buildTool !== 'gradle'){
             this.log("ERROR: You must use Gradle as build tool to use this generator.");
             throw new Error("Gradle is not the build tool used here.")
+        }
+
+        // Import JDL
+        if (this.jdl !== 'Do not import JDL'){
+            shelljs.exec(`jhipster import-jdl ${this.jdl}`);
         }
 
         // Write blockchain communication module package
@@ -301,7 +312,7 @@ import ${packageName}.network.networkException.StateAlreadySet;\n`]
 
         // Write resource file for each entity
         json_entities.forEach(entity => {
-            console.log(`Writing ${entity.name} entity file`);
+            this.log(`Writing ${entity.name} entity file`);
 
             var lowercase = `${entity.name}`.toLowerCase();
 
