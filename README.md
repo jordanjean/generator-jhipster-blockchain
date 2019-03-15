@@ -14,6 +14,10 @@ As this is a [JHipster](http://jhipster.github.io/) module, we expect you have J
 
 - [Installing JHipster](https://jhipster.github.io/installation.html)
 
+We expect you use this generator with the following JHipster configuration:
+
+- Gradle
+
 # Installation
 
 ## With Yarn
@@ -59,7 +63,7 @@ MIT © [Jordan Jean](https://gitlab.com/ugachain)
 
 [npm-image]: https://img.shields.io/npm/v/generator-jhipster-blockchain.svg
 [npm-url]: https://npmjs.org/package/generator-jhipster-blockchain
-[travis-image]: https://travis-ci.org/jordanjean/generator-jhipster-blockchain.svg?branch=master
-[travis-url]: https://travis-ci.org/jordanjean/generator-jhipster-blockchain
-[daviddm-image]: https://david-dm.org/jordanjean/generator-jhipster-blockchain.svg?theme=shields.io
-[daviddm-url]: https://david-dm.org/jordanjean/generator-jhipster-blockchain
+[travis-image]: https://travis-ci.org/ugachain/generator-jhipster-blockchain.svg?branch=master
+[travis-url]: https://travis-ci.org/ugachain/generator-jhipster-blockchain
+[daviddm-image]: https://david-dm.org/ugachain/generator-jhipster-blockchain.svg?theme=shields.io
+[daviddm-url]: https://david-dm.org/ugachain/generator-jhipster-blockchain
