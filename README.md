@@ -18,20 +18,6 @@ We expect you use this generator with the JHipster configuration described in th
 
 # Installation
 
-## With Yarn
-
-To install this module:
-
-```bash
-yarn global add generator-jhipster-blockchain
-```
-
-To update this module:
-
-```bash
-yarn global upgrade generator-jhipster-blockchain
-```
-
 ## With NPM
 
 To install this module:
