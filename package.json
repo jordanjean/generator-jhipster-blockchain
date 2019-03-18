@@ -5,7 +5,10 @@
   "keywords": [
     "yeoman-generator",
     "jhipster-module",
-    "jhipster-5"
+    "jhipster-5",
+    "blockchain",
+    "hyperledger",
+    "fabric"
   ],
   "homepage": "https://gitlab.com/ugachain",
   "author": {
