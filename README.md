@@ -14,25 +14,9 @@ As this is a [JHipster](http://jhipster.github.io/) module, we expect you have J
 
 - [Installing JHipster](https://jhipster.github.io/installation.html)
 
-We expect you use this generator with the following JHipster configuration:
-
-- Gradle
+We expect you use this generator with the JHipster configuration described in the file `./required-jhipster-config.json`. Other configurations have not been tested.
 
 # Installation
-
-## With Yarn
-
-To install this module:
-
-```bash
-yarn global add generator-jhipster-blockchain
-```
-
-To update this module:
-
-```bash
-yarn global upgrade generator-jhipster-blockchain
-```
 
 ## With NPM
 

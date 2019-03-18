@@ -74,6 +74,7 @@ module.exports = class extends BaseGenerator {
         this.clientFramework = this.jhipsterAppConfig.clientFramework;
         this.clientPackageManager = this.jhipsterAppConfig.clientPackageManager;
         this.buildTool = this.jhipsterAppConfig.buildTool;
+        this.databaseType = this.jhipsterAppConfig.databaseType;
 
         // use function in generator-base.js from generator-jhipster
         this.angularAppName = this.getAngularAppName();
@@ -82,12 +83,6 @@ module.exports = class extends BaseGenerator {
         const javaDir = `${jhipsterConstants.SERVER_MAIN_SRC_DIR + this.packageFolder}/`;
         const resourceDir = jhipsterConstants.SERVER_MAIN_RES_DIR;
         const webappDir = jhipsterConstants.CLIENT_MAIN_SRC_DIR;
-
-        // Check Gradle is used
-        if (this.buildTool !== 'gradle'){
-            this.log("ERROR: You must use Gradle as build tool to use this generator.");
-            throw new Error("Gradle is not the build tool used here.")
-        }
 
         // Import JDL
         if (this.jdl !== 'Do not import JDL'){
@@ -140,6 +135,18 @@ module.exports = class extends BaseGenerator {
             this.log(logMsg);
         } else {
             this.installDependencies(installConfig);
+        }
+
+        // Check Gradle is used
+        if (this.buildTool !== 'gradle'){
+            this.log("ERROR: You must use Gradle as build tool to use this generator.");
+            throw new Error("Gradle is not the build tool used here.")
+        }
+
+        // Check SQL is used
+        if (this.databaseType !== 'sql'){
+            this.log("ERROR: You must use SQL as database type to use this generator.");
+            throw new Error("SQL is not the database type used here.")
         }
 
         // Write package statement

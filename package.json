@@ -5,11 +5,14 @@
   "keywords": [
     "yeoman-generator",
     "jhipster-module",
-    "jhipster-5"
+    "jhipster-5",
+    "blockchain",
+    "hyperledger",
+    "fabric"
   ],
   "homepage": "https://gitlab.com/ugachain",
   "author": {
-    "name": "Jordan Jean",
+    "name": "Jordan JEAN, Enzo MOLION, Léo VALETTE, Loris GENTILLON",
     "email": "",
     "url": ""
   },
